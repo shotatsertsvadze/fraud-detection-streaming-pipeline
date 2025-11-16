@@ -1,0 +1,11 @@
+{
+  "transaction_id": "high-risk-001",
+  "timestamp": "2025-11-14T15:30:00Z",
+  "amount": 2500.0,
+  "currency": "EUR",
+  "merchant": "ShadyShop",
+  "country": "RU",
+  "card_last4": "9999",
+  "channel": "ecom",
+  "features": { "device_trust": 0.1 }
+}

@@ -1,20 +1,18 @@
-# Python
+# Python / virtual env
 .venv/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-*.egg-info/
 
 # Terraform
 .terraform/
-*.tfstate
-*.tfstate.*
-crash.log
-terraform.tfvars
+terraform.tfstate
+terraform.tfstate.backup
+
+# Local env / secrets
+.env
 
 # macOS
 .DS_Store
 
-# Build artifacts
+# Lambda build artifacts
 lambdas/*/*.zip

@@ -1,0 +1,11 @@
+{
+  "transaction_id": "f9b7e6c0-2f53-44e1-9b87-e3f3e9c7a001",
+  "timestamp": "2025-11-03T09:00:00Z",
+  "amount": 42.15,
+  "currency": "EUR",
+  "merchant": "CoffeeLab",
+  "country": "DE",
+  "card_last4": "7788",
+  "channel": "ecom",
+  "features": {"device_trust": 0.66}
+}
