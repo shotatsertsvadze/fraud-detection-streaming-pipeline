@@ -1,3 +1,10 @@
+# Real-Time Fraud Detection Streaming Pipeline (AWS)
+
+A real-time fraud detection pipeline built on AWS using a streaming-first architecture.
+The system ingests transaction events via HTTP, processes them through Kinesis, stores RAW and CLEAN data in S3, triggers real-time alerts, and enables analytics via Athena.
+
+---
+
 ## 🚀 High-Level Architecture
 
 This project implements a real-time fraud detection pipeline on AWS using a streaming-first architecture.
@@ -35,3 +42,63 @@ Kinesis Data Streams act as the central event bus, allowing multiple consumers t
    - Athena external tables are defined over both RAW and CLEAN buckets.
    - Partition projection is used to avoid manual partition management.
    - Enables fast querying for investigations and reporting.
+
+---
+
+## 🏗️ Terraform (Infrastructure as Code)
+
+All AWS resources for this project are provisioned with Terraform so the pipeline is reproducible end-to-end.
+
+### Why this structure?
+
+The Terraform code is split into multiple files by component (instead of one large `main.tf`) to keep the infrastructure easy to navigate and review:
+
+- `providers.tf` / `variables.tf` / `outputs.tf`: global setup, inputs, outputs
+- `iam_lambda.tf`: IAM roles and policies for Lambdas and Firehose
+- `kinesis.tf`: Kinesis Data Stream (central event bus)
+- `firehose.tf`: Firehose delivery streams for RAW and CLEAN
+- `apigw_lambda.tf`: API Gateway and Ingest Lambda integration
+- `alerts_lambda.tf`: Alerts Lambda, event source mapping, SNS
+- `athena.tf`: Athena tables over RAW and CLEAN with partition projection
+
+This layout makes it clear where each AWS component is defined and reduces merge conflicts when changing one part of the system.
+
+### What Terraform creates
+
+- **API Gateway** exposing `POST /transactions`
+- **Lambda functions**
+  - Ingest Lambda (validates and publishes to Kinesis)
+  - Transform Lambda (Firehose processing and enrichment)
+  - Alerts Lambda (fraud rules and SNS notifications)
+- **Kinesis Data Stream** as the central stream
+- **Two Firehose delivery streams**
+  - RAW → S3 (unmodified events)
+  - CLEAN → Transform Lambda → S3 (enriched events)
+- **S3 buckets** for RAW and CLEAN zones
+- **SNS topic and email subscription** for alerts
+- **Athena external tables** with partition projection
+- **IAM roles and policies** following least-privilege principles
+
+### Key design decisions
+
+- **Kinesis as the hub:** Firehose and Alerts Lambda consume the same stream independently.
+- **RAW vs CLEAN separation:** RAW is immutable for audit and replay; CLEAN is analytics-ready.
+- **Partition projection in Athena:** avoids `MSCK REPAIR` and manual partition handling.
+- **Ordering per card:** `card_last4` ensures ordering within shards.
+
+### Known problems / trade-offs
+
+- **Partition key skew:** a single `card_last4` may overload a shard.
+  - Improvement: composite or hashed partition keys.
+- **Rule-based fraud detection:** intended as a baseline.
+  - Improvement: add ML-based scoring or anomaly detection.
+- **Storage cost:** RAW + CLEAN duplication increases cost.
+  - Improvement: S3 lifecycle policies (e.g. RAW → Glacier).
+
+### How to deploy
+
+```bash
+cd terraform
+terraform init
+terraform plan
+terraform apply
