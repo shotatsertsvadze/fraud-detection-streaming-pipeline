@@ -1,8 +1,8 @@
 # Real-Time Fraud Detection Streaming Pipeline (AWS)
 
-A real-time fraud detection pipeline built on AWS using a streaming-first architecture.
+A real-time fraud detection pipeline on AWS using a streaming-first design.
 The system ingests transaction events via HTTP, processes them through Kinesis, stores RAW and CLEAN data in S3, triggers real-time alerts, and enables analytics via Athena.
-
+The design focuses on decoupling ingestion, storage, enrichment, and alerting to support scalability, replayability, and independent consumers.
 ---
 
 ## 🚀 High-Level Architecture
@@ -44,6 +44,11 @@ Kinesis Data Streams act as the central event bus, allowing multiple consumers t
    - Enables fast querying for investigations and reporting.
 
 ---
+---
+
+### Add the region note (place it under Terraform section header)
+```md
+All resources are deployed in `eu-central-1`.
 
 ## 🏗️ Terraform (Infrastructure as Code)
 
@@ -95,6 +100,34 @@ This layout makes it clear where each AWS component is defined and reduces merge
 - **Storage cost:** RAW + CLEAN duplication increases cost.
   - Improvement: S3 lifecycle policies (e.g. RAW → Glacier).
 
+
+## 🧪 Runtime Evidence
+
+The pipeline was deployed and validated end-to-end on AWS.
+
+**Proof of execution:**
+- Real-time ingestion via API Gateway
+- RAW events stored in S3 with time-based partitions
+- CLEAN events enriched with `ingest_ts` and `is_high_risk`
+- Fraud alerts delivered via SNS email
+
+### Screenshots
+
+**Architecture**
+![Architecture](docs/screenshots/architecture.png)
+
+**RAW data lake (Firehose → S3)**
+![S3 RAW](docs/screenshots/s3_raw_partitions.png)
+
+**CLEAN enriched events**
+![S3 CLEAN](docs/screenshots/s3_clean_enriched_event.png)
+
+**Real-time fraud alert (SNS email)**
+![SNS Alert](docs/screenshots/sns_alert_email.png)
+### How to deploy
+
+### How to deploy
+
 ### How to deploy
 
 ```bash
@@ -102,3 +135,4 @@ cd terraform
 terraform init
 terraform plan
 terraform apply
+
